@@ -1,23 +1,29 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <time.h>
 int main() {
-  //Creates a file (or lets you read it if it already exists)
-  int fd = open("genericfile", O_RDWR | O_CREAT, 0644);
-  if (fd == -1) {
-    int fd = open("genericfile",  O_RDWR, 0644);
-  }
   //Creates the struct stat you get information from and gets the information
-  struct stat * stbuf = (struct stat *) malloc(sizeof(struct stat));
-  int st = stat("genericfile",  stbuf);
+  char *fd = "file.txt";
+  struct stat *buf;
+  buf = malloc(sizeof(struct stat));
+  stat(fd, buf);
   //Prints out the file size
-  printf("File size: %d\n" , stbuf->st_size);
+  long size = buf->st_size;
+  if (size > 1024)
+    printf("File size: %ld KB\n", size / 1024);
+  else if (size > 1024 * 1024)
+    printf("File size: %ld MB\n", size / (1024 * 1024));
+  else if (size > 1024 * 1024 * 1024)
+    printf("File size: %ld GB\n", size/ (1024 * 1024 * 1024));
+  else
+    printf("File size: %lld bytes\n", buf->st_size);
   //Prints out the permissions
   char fullmode[11] = "";
-  int m = stbuf->st_mode;
-  if (S_ISDIR(stbuf->st_mode)) {
+  int m = buf->st_mode;
+  if (S_ISDIR(buf->st_mode)) {
     fullmode[0] = 'd';
   }
   else {
@@ -79,8 +85,8 @@ int main() {
   }
   printf("Permissions (mode): %s\n", fullmode);
   //Prints out the time
-  char * ct = ctime(&stbuf->st_atime);
-  printf("Time of last access: %s\n", ct);
-  close(fd);
+  char *ct = ctime(&buf->st_atime);
+  printf("Time of last access: %s", ct);
+  close(*fd);
   return 0;
 }
